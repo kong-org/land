@@ -1,0 +1,226 @@
+// Import contracts.
+//import "./CitizenERC721.sol";
+//import "./CtznERC20.sol";
+//import './imports/RegisterMerkleRoot.sol';
+import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol';
+import "hardhat/console.sol";
+
+//@title Kong Land Alpha $CITIZEN Token
+contract LandERC20 is ERC20, ERC20Burnable {
+
+
+
+
+    // Device Registry
+    RegisterMerkleRoot public _deviceClaimRegistry;
+    CitizenERC721 public _citizenERC721;
+
+    // Date when claims are first available.
+    uint256 _claimStartTime;
+    bytes32 _kongRoot;
+    bytes32 _ctznRoot;
+    bytes32 _titanRoot;
+
+    // Recorded claims
+    mapping(uint256 => bool) public _claimedERC721;
+    mapping(bytes32 => bool) public _claimedDevice;
+    mapping(address => bool) public _claimedKong;
+
+    event LandClaimed(address from, uint256 amount);
+
+    constructor(RegisterMerkleRoot deviceClaimRegistry, CitizenERC721 citizenERC721, uint256 claimStartTime, bytes32 kongRoot, bytes32 ctznRoot, bytes32 titanRoot) ERC20('KONG $LAND', 'LAND') {
+        // TOTAL: _mint(msg.sender, 1407230468 * 10 ** 18);
+        _mint(0xbdC95cA05cC25342Ae9A96FB12Cbe937Efe2e28C, 500000000 * 10 ** 18); // KONG Land Treasury
+        _mint(0xAB35D3476251C6b614dC2eb36380D7AF1232D822, 17607918 * 10 ** 18); // Early $KONG contributors
+        _mint(0xAB35D3476251C6b614dC2eb36380D7AF1232D822, 35000000 * 10 ** 18); // $CITIZEN recognition
+
+        // Set up contracts.
+        _deviceClaimRegistry = deviceClaimRegistry;
+        _citizenERC721 = citizenERC721;
+
+        // Set up claim start.
+        _claimStartTime = claimStartTime;
+
+        // Set up claim roots.       
+        _kongRoot = kongRoot;
+        _ctznRoot = ctznRoot;
+        // _titanRoot = titanRoot;
+    }
+
+    function treasuryClaim() external {
+        // TODO: allow the treasury to claim any unminted tokens after a speific date, minus deviceClaims
+        
+    }
+
+    function kongClaim(
+        bytes32[] memory proof,
+        uint256 amount
+    ) external {
+        // TODO: snapshot all kong holders.
+
+        // The sender address must match that in the proof
+        address from = msg.sender;
+
+        // Verify that timelock has expired.
+        require(block.timestamp >= _claimStartTime, 'Cannot claim yet.');    
+
+        // Only allow claims before current KONG notes are claimable on October 1st, 2022, e.g. no double dip.
+        require(block.timestamp <= 1664582400, 'Claim period ended.');
+
+        // Verify that this token has not claimed yet.
+        require(_claimedKong[from] == false, 'Already claimed.');
+
+        // Check KONG root to see if address is included.
+
+
+        // Set that this token has been claimed.
+        _claimedKong[from] = true;
+
+        emit LandClaimed(from, amount);
+    }
+
+    // TODO: Let any KONG chipped device mint.
+    function deviceClaim(
+        bytes32[] memory proof, 
+        bytes32 root, 
+        bytes32 primaryPublicKeyHash,
+        bytes32 secondaryPublicKeyHash,
+        bytes32 tertiaryPublicKeyHash,    
+        bytes32 hardwareSerial,
+        uint256 kongAmount
+    ) external {
+        
+        address from = msg.sender;
+
+        // Verify that timelock has expired.
+        require(block.timestamp >= _claimStartTime, 'Cannot claim yet.'); 
+
+        // Check KONG amount.
+        require(kongAmount >= 0, 'Impossible kongAmount.');
+        require(kongAmount <= 500, 'Impossible kongAmount.');     
+
+        // Generate the hardwarehash of the device
+        bytes32 hardwareHash = sha256(abi.encodePacked(primaryPublicKeyHash, secondaryPublicKeyHash, tertiaryPublicKeyHash, hardwareSerial));  
+
+        // Verify that this token has not minted yet.
+        require(_claimedDevice[hardwareHash] == false, 'Already claimed.');
+
+        // Verify that the proof exists.
+        require(RegisterMerkleRoot(_deviceClaimRegistry).verifyProof(proof, root, hardwareHash, kongAmount), 'Proof failed to verify.');
+
+        // Set that this token has been claimed.
+        _claimedDevice[hardwareHash] = true;
+
+        // Set KONG amount to 10 for all other devices.
+        if (kongAmount == 0) {
+            kongAmount = 10;
+        }
+
+        // Mint based on KONG ammount.
+        _mint(msg.sender, kongAmount * 500 ** 18);
+        emit LandClaimed(from, kongAmount * 500 ** 18);
+    }
+
+    // TODO: Let $CITIZENs mint.
+    function citizenClaim(uint256 tokenId) external {
+
+        address from = msg.sender;
+
+        // Verify that timelock has expired.
+        require(block.timestamp >= _claimStartTime, 'Cannot claim yet.');   
+
+        // Allow current $CITIZENs to claim up until August 1st, 2022.
+        // require(block.timestamp <= 1659312000, 'Claim period ended.');     
+
+        // Require that the account calling is the same as the owner of the tokenId.
+        require(_citizenERC721.ownerOf(tokenId) == from, "Only token holder can claim.");
+
+        // Verify that this token has not minted yet.
+        require(_claimedERC721[tokenId] == false, 'Already claimed.');
+
+        // Set that this token has been claimed.
+        _claimedERC721[tokenId] = true;
+
+        // Verify that token holder is 227 or lower.
+        if(tokenId <= 227) {
+            // Mint 1,000,000 to burned Alpha $CITIZENs previous to announcement.
+            _mint(msg.sender, 1000000 * 10 ** 18);
+            emit LandClaimed(from, 1000000 * 10 ** 18);
+        }
+
+        // Verify Alphas that burn after contract deployment.
+        if(tokenId <= 500) {
+            // Mint 250,000 to Alpha $CITIZENs who burn after announcement.
+            _mint(msg.sender, 250000 * 10 ** 18);
+            emit LandClaimed(from, 250000 * 10 ** 18);
+        }
+
+        // Verify Titans.
+        if(tokenId <= 1000) {
+            // Mint 250,000 to Alpha $CITIZENs who burn after announcement.
+            _mint(msg.sender, 100000 * 10 ** 18);
+            emit LandClaimed(from, 100000 * 10 ** 18);
+        }
+
+        // Check to see if these $CITIZENs are not included in exception roots, e.g. ERC20 or Titan.
+        if(tokenId > 1000) {
+            // Mint 10,000 to any future $CITIZEN.
+            _mint(msg.sender, 10000 * 10 ** 18);
+            emit LandClaimed(from, 10000 * 10 ** 18);
+        }
+
+    }
+
+    // Special claim for $CTZNs after they burn.
+    function citizenClaim(
+        bytes32[] memory proof,
+        uint256 amount,
+        uint256 tokenId    
+    ) external {
+
+        address from = msg.sender;
+
+        // Verify that timelock has expired.
+        require(block.timestamp >= _claimStartTime, 'Cannot claim yet.');   
+
+        // Allow current $CITIZENs to claim up until August 1st, 2022.
+        // require(block.timestamp <= 1659312000, 'Claim period ended.');     
+
+        // Require that the account calling is the same as the owner of the tokenId.
+        require(_citizenERC721.ownerOf(tokenId) == from, "Only token holder can claim.");
+
+        // Verify that this token has not minted yet.
+        require(_claimedERC721[tokenId] == false, 'Already claimed.');
+
+        // TODO: check proof and ammount listed there.
+
+    }
+
+    // Special claim for early Titan holders after they burn.
+    // function titanClaim(
+    //     bytes32[] memory proof,
+    //     uint256 amount,
+    //     uint256 tokenId    
+    // ) external {
+
+    //     address from = msg.sender;
+
+    //     // Verify that timelock has expired.
+    //     require(block.timestamp >= _claimStartTime, 'Cannot claim yet.');   
+
+    //     // Allow current $CITIZENs to claim up until August 1st, 2022.
+    //     // require(block.timestamp <= 1659312000, 'Claim period ended.');     
+
+    //     // Require that the account calling is the same as the owner of the tokenId.
+    //     require(_citizenERC721.ownerOf(tokenId) == from, "Only token holder can claim.");
+
+    //     // Verify that this token has not minted yet.
+    //     require(_claimedERC721[tokenId] == false, 'Already claimed.');
+
+    //     // TODO: check proof and ammount listed there.
+
+    // }
+
+
+}
