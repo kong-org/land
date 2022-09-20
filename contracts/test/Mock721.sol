@@ -13,9 +13,7 @@ contract Mock721 is ERC721, Ownable {
 
     constructor() ERC721("Mock", "MTK") {}
 
-    function safeMint(address to) public onlyOwner {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
+    function safeMint(address to, uint256 tokenId) public onlyOwner {
         _safeMint(to, tokenId);
     }
 }

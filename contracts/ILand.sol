@@ -3,7 +3,7 @@ pragma solidity ^0.8.9;
 /**
  * @title  Interface for $LAND Token Contract.
  */
-interface LandInterface {
+interface ILand {
 
     // Add an address to the whitelist.
     function addWhitelistAddress(address transferer) external;
