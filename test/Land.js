@@ -41,8 +41,11 @@ describe("LandTests", function () {
     LandContract = await LandToken.deploy(Mock721Contract.address);
 
     // NOTE: edit the merkle root here if the JSON is modified.
-    KongTokenClaimContract = await KongTokenClaim.deploy(LandContract.address, "0x1890e605cc3357b78695d105579484e1f2bc70ec4e418f0198769c8c7e3b298d", 1563686528, 1763686528)
-    CitizenTokenClaimContract = await CitizenTokenClaim.deploy(LandContract.address, Mock721Contract.address, 1563686528, 1763686528)
+    // $CITIZEN Airdrop expected open: 1664582401, Oct. 1, 2022
+    // $CiTIZEN Airdrop expected close: 1672531199, December 31st, 2022
+    // $KONG Airdrop expected close: 1696723201, Oct. 8 2023
+    KongTokenClaimContract = await KongTokenClaim.deploy(LandContract.address, "0x1890e605cc3357b78695d105579484e1f2bc70ec4e418f0198769c8c7e3b298d", 1563686528, 1696723201)
+    CitizenTokenClaimContract = await CitizenTokenClaim.deploy(LandContract.address, Mock721Contract.address, 1563686528, 1672531199)
 
     // Add minter and DAO roles.
     await LandContract.grantRole(ethers.utils.keccak256(ethers.utils.toUtf8Bytes('MINTER_ROLE')), minter.address);
