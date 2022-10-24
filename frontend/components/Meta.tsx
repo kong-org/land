@@ -31,14 +31,14 @@ export default function Meta() {
       <meta property="og:url" content={url} />
       <meta property="og:title" content={tokenName} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={`${url}meta.png`} />
+      <meta property="og:image" content={`${url}/meta.jpeg`} />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
       <meta property="twitter:url" content={url} />
       <meta property="twitter:title" content={tokenName} />
       <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={`${url}meta.png`} />
+      <meta property="twitter:image" content={`${url}/meta.jpeg`} />
 
       {/* Favicon */}
       <link rel="shortcut icon" href="/favicon.ico" />
