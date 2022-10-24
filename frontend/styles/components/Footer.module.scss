@@ -1,0 +1,19 @@
+// Footer
+.footer {
+  // Align right on desktop
+  text-align: right;
+  height: 100px;
+  padding: 0 25px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+// Responsive
+@media screen and (max-width: 728px) {
+  .footer {
+    // Align links center on mobile
+    text-align: center;
+  }
+}

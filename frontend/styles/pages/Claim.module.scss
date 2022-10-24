@@ -1,0 +1,62 @@
+// Claim page
+.claim {
+  margin: auto;
+  width: calc(100% - 50px);
+  max-width: 730px;
+}
+
+.claim__box {
+  margin-top: -50px;
+  background: linear-gradient(
+    136.87deg,
+    rgba(66, 75, 70, 0.27) 4.36%,
+    rgba(72, 83, 76, 0.27) 100.67%
+  );
+  mix-blend-mode: lighten;
+  border-radius: 20px;
+  padding: 80px 25px;
+  text-align: center;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 400;
+  }
+
+  p {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #b5ada7;
+  }
+
+  button {
+    display: inline-block;
+    padding: 2px 24px 0;
+    border-radius: 50px;
+    line-height: 48px;
+    background: #2bff88;
+    color: #0a1b11;
+    text-transform: uppercase;
+    margin-top: 35px;
+    font-size: 15px;
+    transition: 0.2s background-color;
+    font-weight: bold;
+
+    &:hover {
+      background-color: #20cf6c;
+    }
+  }
+}
+
+@media (min-width: 760px) {
+  .claim__box {
+    padding: 80px 40px;
+
+    h1 {
+      font-size: 34px;
+    }
+
+    p {
+      font-size: 18px;
+    }
+  }
+}
